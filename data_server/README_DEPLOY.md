@@ -38,6 +38,15 @@ Expected response:
 {"status":"ok"}
 ```
 
+## Initialize Tables
+
+The deployed app does not create tables during startup. If the database is empty,
+run this once from a trusted local machine or Render Shell:
+
+```bash
+python scripts/init_db.py
+```
+
 ## API Docs
 
 ```text
