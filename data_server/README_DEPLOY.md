@@ -13,10 +13,13 @@ Use these values when creating a Render Web Service.
 
 ## Environment Variables
 
-Add this variable in Render.
+Add these variables in Render.
 
 ```env
 DATABASE_URL=postgresql://postgres.PROJECT_ID:DB_PASSWORD@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres
+ADMIN_API_KEY=change-this-to-a-private-random-value
+CORS_ALLOW_ORIGINS=*
+PYTHON_VERSION=3.11.9
 ```
 
 Do not commit the local `.env` file to GitHub.
@@ -45,4 +48,22 @@ https://YOUR_RENDER_SERVICE.onrender.com/docs
 
 ```text
 https://YOUR_RENDER_SERVICE.onrender.com/cases/search?q=명의신탁
+```
+
+## Protected Write APIs
+
+Write/import APIs require the `X-Admin-API-Key` header.
+
+```bash
+curl -X POST "https://YOUR_RENDER_SERVICE.onrender.com/cases/import-file" \
+  -H "X-Admin-API-Key: YOUR_ADMIN_API_KEY" \
+  -F "file=@case.txt"
+```
+
+## Upload Files From Terminal
+
+```bash
+python scripts/upload_files.py ./data/raw_cases \
+  --server-url https://YOUR_RENDER_SERVICE.onrender.com \
+  --admin-api-key YOUR_ADMIN_API_KEY
 ```

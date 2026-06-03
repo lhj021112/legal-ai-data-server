@@ -43,3 +43,28 @@ class CaseService:
                 detail="Search query must not be empty.",
             )
         return self.repository.search(cleaned_query)
+
+    def import_cases(self, case_items: list[dict]):
+        created = 0
+        updated = 0
+        failed = 0
+        errors = []
+
+        for item in case_items:
+            try:
+                case_data = CaseCreate.model_validate(item)
+                _, was_created = self.repository.upsert(case_data)
+                if was_created:
+                    created += 1
+                else:
+                    updated += 1
+            except Exception as exc:
+                failed += 1
+                errors.append(str(exc))
+
+        return {
+            "created": created,
+            "updated": updated,
+            "failed": failed,
+            "errors": errors[:10],
+        }
