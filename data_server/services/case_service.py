@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from datetime import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -34,6 +38,20 @@ class CaseService:
                 detail=f"Case not found: {case_id}",
             )
         return case
+
+    def list_cases(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        updated_after: datetime | None = None,
+    ):
+        total = self.repository.count(updated_after=updated_after)
+        cases = self.repository.list(
+            limit=limit,
+            offset=offset,
+            updated_after=updated_after,
+        )
+        return total, cases
 
     def search_cases(self, query: str):
         cleaned_query = query.strip()

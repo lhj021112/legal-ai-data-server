@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from sqlalchemy import or_, select
+from datetime import datetime
+
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from models.case_model import Case
@@ -33,6 +35,26 @@ class CaseRepository:
     def get_by_case_id(self, case_id: str) -> Case | None:
         statement = select(Case).where(Case.case_id == case_id)
         return self.db.scalar(statement)
+
+    def list(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+        updated_after: datetime | None = None,
+    ) -> list[Case]:
+        statement = select(Case)
+        if updated_after is not None:
+            statement = statement.where(Case.updated_at > updated_after)
+
+        statement = statement.order_by(Case.id.asc()).limit(limit).offset(offset)
+        return list(self.db.scalars(statement).all())
+
+    def count(self, updated_after: datetime | None = None) -> int:
+        statement = select(func.count()).select_from(Case)
+        if updated_after is not None:
+            statement = statement.where(Case.updated_at > updated_after)
+
+        return int(self.db.scalar(statement) or 0)
 
     def search(self, query: str, limit: int = 50) -> list[Case]:
         pattern = f"%{query}%"

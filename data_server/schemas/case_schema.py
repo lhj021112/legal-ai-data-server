@@ -35,6 +35,10 @@ class CaseResponse(CaseBase):
     updated_at: datetime
 
 
-class CaseSearchResponse(BaseModel):
+class CaseListResponse(BaseModel):
     total: int
     items: List[CaseResponse]
+
+
+class CaseSearchResponse(CaseListResponse):
+    pass
