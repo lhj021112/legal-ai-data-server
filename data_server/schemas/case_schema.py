@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class CaseBase(BaseModel):
@@ -33,6 +33,30 @@ class CaseResponse(CaseBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    source: Optional[str] = None
+    source_url: Optional[str] = None
+    source_retrieved_at: Optional[date] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def expose_provenance(cls, value):
+        if isinstance(value, dict):
+            data = dict(value)
+            raw_json = data.get("raw_json")
+        else:
+            data = {field: getattr(value, field) for field in cls.model_fields if hasattr(value, field)}
+            raw_json = getattr(value, "raw_json", None)
+
+        if isinstance(raw_json, dict):
+            data.setdefault("source", raw_json.get("source"))
+            data.setdefault("source_url", raw_json.get("source_url"))
+            retrieved_at = raw_json.get("retrieved_at")
+            if retrieved_at:
+                try:
+                    data.setdefault("source_retrieved_at", date.fromisoformat(str(retrieved_at)))
+                except ValueError:
+                    pass
+        return data
 
 
 class CaseListResponse(BaseModel):
