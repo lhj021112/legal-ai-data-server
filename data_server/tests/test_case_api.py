@@ -134,6 +134,25 @@ def test_get_case_keeps_existing_response_shape(client, monkeypatch):
     assert "items" not in response.json()
 
 
+def test_case_search_exposes_normalized_official_source_fields(client, monkeypatch):
+    case = make_case("prec-1", 1)
+    case["raw_json"] = {
+        "source": "국가법령정보센터",
+        "source_url": "https://www.law.go.kr/LSW/precInfoP.do?precSeq=1",
+        "retrieved_at": "2026-10-21",
+    }
+    patch_service(monkeypatch, [case])
+
+    response = client.get("/cases/search?q=명의신탁")
+
+    assert response.status_code == 200
+    result = response.json()["items"][0]
+    assert result["source"] == "국가법령정보센터"
+    assert result["source_url"] == "https://www.law.go.kr/LSW/precInfoP.do?precSeq=1"
+    assert result["source_retrieved_at"] == "2026-10-21"
+    assert result["raw_json"]["source_url"] == result["source_url"]
+
+
 def test_post_cases_still_requires_admin_api_key(client, monkeypatch):
     patch_service(monkeypatch, [])
 
