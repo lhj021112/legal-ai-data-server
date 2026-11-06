@@ -58,7 +58,7 @@ class LawService:
         matching_unverified = False
         coverage_missing = False
         seen_ids: set[str] = set()
-        terms = q.casefold().split()
+        terms = _query_terms(q)
         snapshot = bundled_laws()
         matched: list[tuple[int, dict | None]] = []
 
