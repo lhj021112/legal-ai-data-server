@@ -221,3 +221,26 @@ def test_natural_language_terms_use_relevance_instead_of_strict_and_matching():
     )
 
     assert [item.article_id for item in result.items] == ["labor-60", "other-law-1"]
+
+
+def test_natural_language_law_question_matches_article_despite_korean_particles():
+    annual_leave = verified_law()
+    annual_leave.update(
+        article_id="labor-60",
+        law_id="001872",
+        law_name="근로기준법",
+        article_number="제60조",
+        text="제60조(연차 유급휴가) 1년간 80퍼센트 이상 출근한 근로자에게 휴가를 준다.",
+        source_url="https://www.law.go.kr/법령/근로기준법/제60조",
+    )
+    labor_row = row(annual_leave)
+    labor_row.case_id = "labor-60"
+    labor_row.title = "근로기준법 제60조 연차 유급휴가"
+    labor_row.search_text = "근로기준법 제60조 연차 유급휴가 출근 근로자 휴가"
+    labor_row.sub_category = "근로기준법"
+
+    result = LawService(FakeSession([labor_row])).search(
+        "근로기준법상 연차유급휴가 발생 요건은 무엇인가요?", 5, date(2026, 10, 15)
+    )
+
+    assert [item.article_id for item in result.items] == ["labor-60"]
